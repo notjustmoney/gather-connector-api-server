@@ -29,7 +29,7 @@ class UserAdmin(BaseUserAdmin):
             'name', 'display_name', 'phone_number', 'department', 'task')}),
     )
     search_fields = 'email',
-    ordering = 'department',
+    ordering = 'is_superuser', 'is_admin', 'department',
     filter_horizontal = ()
 
 

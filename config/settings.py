@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 
     'phonenumber_field',
 
-    'apps.accounts',
+    'apps.authentication',
 ]
 
 MIDDLEWARE = [
@@ -123,4 +123,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'authentication.User'
