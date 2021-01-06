@@ -29,15 +29,14 @@ class UserManager(BaseUserManager):
         if not display_name:
             display_name = name
         user = self.model(
-            email=self.normalize_email(email)
+            email=self.normalize_email(email),
+            name=name,
+            display_name=display_name,
+            image_url='/static/profile/default.png',
+            phone_number=phone_number,
+            department=department,
+            task=task
         )
-        user.name = name
-        user.display_name = display_name
-        user.image_url = '/static/profile/default.png'
-        user.email = email
-        user.phone_number = phone_number
-        user.department = department
-        user.task = task
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -95,26 +94,19 @@ class User(AbstractBaseUser):
     email = models.EmailField(
         verbose_name='email address',
         max_length=255,
-        unique=True,
-        null=False)
-    name = models.CharField(max_length=30, null=False)
+        unique=True,)
+    name = models.CharField(max_length=30, blank=False)
     display_name = models.CharField(
         verbose_name='display name',
-        max_length=30,
-        null=False)
+        max_length=30,)
     image_url = models.CharField(
         verbose_name='image url',
         max_length=255,
-        default='/static/profile/default.png',
-        null=False)
+        default='/static/profile/default.png',)
     phone_number = PhoneNumberField(
         verbose_name='phone number',
-        null=False,
-        blank=False,
         unique=True)
-    department = models.CharField(
-        max_length=30,
-        null=False)
+    department = models.CharField(max_length=30)
     task = models.CharField(max_length=30)
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
