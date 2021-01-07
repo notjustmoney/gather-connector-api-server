@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'phonenumber_field',
 
     'apps.authentication',
+    'apps.introduction',
 ]
 
 MIDDLEWARE = [
@@ -131,9 +132,9 @@ STATIC_URL = '/static/'
 AUTH_USER_MODEL = 'authentication.User'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-    ]
+    )
 }
 
 REST_AUTH_SERIALIZERS = {
