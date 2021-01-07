@@ -8,6 +8,8 @@ django = "*"
 djangorestframework = "*"
 django-phonenumber-field = "*"
 phonenumbers = "*"
+django-rest-auth = "*"
+requests = "*"
 
 [dev-packages]
 
