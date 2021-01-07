@@ -65,3 +65,12 @@ class LoginSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+class UserSerializer(serializers.ModelSerializer):
+    answers = serializers.HyperlinkedRelatedField(many=True, view_name='answer-detail', read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['email', 'name', 'display_name', 'image_url', 'phone_number',
+                  'department', 'task', 'is_active', 'answers']

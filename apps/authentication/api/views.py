@@ -3,18 +3,14 @@ from django.contrib.auth import login
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
 
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework import status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
 
-from rest_auth.models import TokenModel
-from rest_auth.app_settings import TokenSerializer, create_token
+from ..models import User
 
-from .serializers import RegistrationSerializer, LoginSerializer
+from .serializers import RegistrationSerializer, UserSerializer
 
 sensitive_post_parameters_m = method_decorator(
     sensitive_post_parameters(
@@ -43,3 +39,11 @@ class TokenHealthCheckAPIView(APIView):
     def get(self, request):
         self.contents = {'status': 'active token'}
         return Response(self.contents)
+
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    list, retrieve action
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

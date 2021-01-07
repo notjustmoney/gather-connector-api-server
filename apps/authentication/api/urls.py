@@ -3,8 +3,9 @@ from django.urls import path, include
 
 from .views import (
     RegistrationAPIView,
-    TokenHealthCheckAPIView
+    TokenHealthCheckAPIView,
 )
+
 
 urlpatterns = [
     path(r'', include('rest_auth.urls')),
