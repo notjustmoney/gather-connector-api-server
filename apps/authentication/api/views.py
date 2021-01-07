@@ -36,28 +36,6 @@ class RegistrationAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class LoginView(GenericAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = LoginSerializer
-    token_model = TokenModel
-
-    @sensitive_post_parameters_m
-    def dispatch(self, *args, **kwargs):
-        return super(LoginView, self).dispatch(*args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        user_serializer = self.get_serializer(data=request.data, context={'request': request})
-        user_serializer.is_valid(raise_exception=True)
-
-        user = user_serializer.validated_data['user']
-        token = create_token(self.token_model, user, user_serializer)
-        if getattr(settings, 'REST_SESSION_LOGIN', True):
-            login(request, user)
-
-        token_serializer = TokenSerializer(instance=token, context={'request': request})
-        return Response(token_serializer.data, status=status.HTTP_200_OK)
-
-
 class TokenHealthCheckAPIView(APIView):
     permission_classes = IsAuthenticated,
     contents = None
