@@ -1,3 +1,5 @@
 from .song import (SongViewSet, SongCommentViewSet)
 
-from .playlist import (SongRequestViewSet, SongRequestCommentViewSet)
+from .playlist import (SongRequestManager,
+                       SongRequestViewSet,
+                       SongRequestCommentViewSet)

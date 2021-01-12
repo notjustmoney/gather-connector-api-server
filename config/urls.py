@@ -29,7 +29,6 @@ urlpatterns = [
     path(r'api/', include(router.urls)),
     path(r'api/auth/', include('apps.authentication.api.urls')),
     path(r'api/introduction/', include('apps.introduction.api.urls')),
-    # path(r'api/musics/', include('apps.musics.api.urls')),
     path(r'api/musics/', include('apps.song.api.urls')),
     path(r'api-auth/', include('rest_framework.urls')),
 ]

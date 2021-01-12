@@ -24,10 +24,11 @@ class SongSerializer(serializers.ModelSerializer):
         view_name='song-comments-detail',
         parent_lookup_kwargs={'song_pk': 'song__pk'}
     )
+    video_uri = serializers.CharField(read_only=True, source='uri')
 
     class Meta:
         model = Song
-        fields = ['url', 'title', 'play_cnt', 'like_cnt', 'comments']
+        fields = ['url', 'video_uri', 'title', 'play_cnt', 'like_cnt', 'comments']
 
 
 class LikeSongSerializer(serializers.ModelSerializer):

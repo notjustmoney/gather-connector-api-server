@@ -1,4 +1,7 @@
+import datetime
+
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import utc
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -7,12 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 
 from apps.common.permissions import IsOwnerOrReadOnly
 
-from apps.song.models import Song, Comment, LikeSong, LikeComment
+from apps.song.models import Song, Comment
 
-from ..serializers import (SongSerializer,
-                           SongCommentSerializer,
-                           LikeSongSerializer,
-                           LikeCommentSerializer)
+from ..serializers import SongSerializer, SongCommentSerializer
 
 from .like import like_song, like_comment
 
@@ -35,7 +35,16 @@ class SongCommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         song_pk = self.kwargs.get('song_pk', None)
-        return Comment.objects.filter(song=song_pk)
+        return Comment.objects.filter(song=song_pk, deleted_at__isnull=True)
+
+    def destroy(self, request, *args, **kwargs):
+        comment_pk = kwargs.get('pk', None)
+        comment = get_object_or_404(Comment, pk=comment_pk)
+        if comment.deleted_at:
+            return Response({"message": '처리할 수 없는 요청입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+        comment.deleted_at = datetime.datetime.utcnow().replace(tzinfo=utc)
+        comment.save()
+        return Response(None, status=status.HTTP_204_NO_CONTENT)
 
     def perform_create(self, serializer):
         user = self.request.user

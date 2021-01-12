@@ -14,7 +14,8 @@ class KeywordAdmin(admin.ModelAdmin):
 
 @admin.register(SongRequest)
 class SongRequestAdmin(admin.ModelAdmin):
-    list_display = 'song', 'user', 'requested_at',
+    list_display = 'song', 'user', 'requested_at', 'played_at',
+    list_filter = 'deleted_at',
 
 
 @admin.register(Comment)

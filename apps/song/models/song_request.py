@@ -10,5 +10,6 @@ class SongRequest(models.Model):
                              related_name='song_requests',
                              on_delete=models.CASCADE)
     requested_at = models.DateTimeField(auto_now_add=True)
-    played_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    played_at = models.DateTimeField(null=True, blank=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
