@@ -1,0 +1,128 @@
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+
+from rest_framework import serializers, exceptions
+
+from ..models import Song, Keyword, SongRequest, Comment, LikeSong, LikeComment
+
+from .scrapper import get_video_title_and_uri
+from .relations import CommentHyperlink
+
+
+class LikeCommentSerializer(serializers.ModelSerializer):
+    comment = CommentHyperlink(read_only=True, view_name='comment-detail')
+    user = serializers.HyperlinkedRelatedField(read_only=True, view_name='user-detail')
+
+    class Meta:
+        model = LikeComment
+        fields = ['comment', 'user']
+
+
+class LikeSongSerializer(serializers.ModelSerializer):
+    song = serializers.HyperlinkedRelatedField(read_only=True, view_name='song-detail')
+    user = serializers.HyperlinkedRelatedField(read_only=True, view_name='user-detail')
+
+    class Meta:
+        model = LikeSong
+        fields = ['song', 'user']
+
+
+class SongCommentSerializer(serializers.ModelSerializer):
+    song = serializers.HyperlinkedRelatedField(read_only=True, view_name='song-detail')
+    user = serializers.HyperlinkedRelatedField(read_only=True, view_name='user-detail')
+    url = CommentHyperlink(read_only=True, view_name='comment-detail')
+
+    class Meta:
+        model = Comment
+        fields = ['url', 'song', 'user', 'contents', 'created_at', 'updated_at', 'like_cnt']
+
+
+class SongRequestCommentSerializer(serializers.ModelSerializer):
+    user = serializers.HyperlinkedRelatedField(read_only=True, view_name='user-detail')
+    song_request = serializers.HyperlinkedRelatedField(read_only=True,
+                                                       view_name='songrequest-detail')
+    song = serializers.HyperlinkedRelatedField(read_only=True, view_name='song-detail')
+    url = CommentHyperlink(read_only=True, view_name='comment-detail')
+
+    class Meta:
+        model = Comment
+        fields = ['url', 'song', 'user', 'contents', 'created_at', 'updated_at', 'playlist.py', 'like_cnt']
+
+    def create(self, validated_data):
+        user = validated_data.pop('user', None)
+        song_request = validated_data.pop('playlist.py', None)
+
+        song = song_request.song
+        return super().create({
+            "song": song,
+            "user": user,
+            **validated_data,
+        })
+
+
+class SongSerializer(serializers.ModelSerializer):
+    comments = SongCommentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Song
+        fields = ['url', 'title', 'play_cnt', 'like_cnt', 'comments']
+
+
+class KeywordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Keyword
+        fields = '__all__'
+
+
+class SongRequestSerializer(serializers.ModelSerializer):
+    data_type = serializers.ChoiceField(['uri', 'keyword'], write_only=True)
+    data = serializers.CharField(max_length=50, write_only=True)
+
+    song = serializers.HyperlinkedRelatedField(read_only=True, view_name='song-detail')
+    user = serializers.HyperlinkedRelatedField(read_only=True, view_name='user-detail')
+    like_cnt = serializers.ReadOnlyField(source='song.like_cnt')
+    play_cnt = serializers.ReadOnlyField(source='song.play_cnt')
+
+    class Meta:
+        model = SongRequest
+        fields = ['url', 'song', 'user', 'requested_at', 'data_type', 'data', 'like_cnt', 'play_cnt']
+
+    def create(self, validated_data):
+        data_type = validated_data.pop('data_type', None)
+        data = validated_data.pop('data', None)
+        user = validated_data['user']
+
+        if data_type == 'keyword':
+            try:
+                keyword = Keyword.objects.get(name=data)
+                song = keyword.song
+            except Keyword.DoesNotExist:
+                video_title, video_uri = get_video_title_and_uri(data)
+                song, created = Song.objects.get_or_create(title=video_title, uri=video_uri)
+                Keyword.objects.get_or_create(song=song, name=data)
+        elif data_type == 'uri':
+            song, created = Song.objects.get_or_create(uri=data)
+        else:
+            raise exceptions.NotAcceptable('지원하지 않는 유형입니다.')
+        song_request = super().create({"song": song, "user": user})
+        return song_request
+
+    def update(self, instance, validated_data):
+        pass
+
+    def validate(self, attrs):
+        data_type = attrs['data_type']
+
+        if data_type == 'uri':
+            uri = attrs['data']
+            validator = URLValidator()
+            try:
+                validator(uri)
+            except ValidationError:
+                raise serializers.ValidationError('wrong uri')
+        elif data_type == 'keyword':
+            keyword = attrs['data']
+            if len(keyword) > 50:
+                raise serializers.ValidationError('keyword is too long')
+        return attrs
+
