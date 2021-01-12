@@ -14,9 +14,11 @@ class Question(models.Model):
 
 class Answer(models.Model):
     user = models.ForeignKey('authentication.User',
-                             related_name='answers', on_delete=models.CASCADE)
+                             related_name='answers',
+                             on_delete=models.CASCADE)
     question = models.ForeignKey('introduction.Question',
-                                 related_name='question', on_delete=models.CASCADE)
+                                 related_name='answers',
+                                 on_delete=models.CASCADE)
     contents = models.TextField()
     answered_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
