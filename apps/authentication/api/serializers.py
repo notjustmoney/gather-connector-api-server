@@ -69,7 +69,7 @@ class LoginSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     answers = serializers.HyperlinkedRelatedField(many=True, view_name='answer-detail', read_only=True)
-    song_requests = serializers.HyperlinkedRelatedField(many=True, view_name='songrequest-detail', read_only=True)
+    song_requests = serializers.HyperlinkedRelatedField(many=True, view_name='playlist-songs-detail', read_only=True)
 
     class Meta:
         model = User
