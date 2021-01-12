@@ -47,6 +47,8 @@ INSTALLED_APPS = [
 
     'apps.authentication',
     'apps.introduction',
+    'apps.song',
+    # 'apps.musics',
 ]
 
 MIDDLEWARE = [

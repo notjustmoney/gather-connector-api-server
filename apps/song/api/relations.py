@@ -1,11 +1,10 @@
 from rest_framework import serializers
-
 from rest_framework.reverse import reverse
 
 from ..models import Comment, LikeComment
 
 
-class CommentHyperlink(serializers.HyperlinkedIdentityField):
+class CommentHyperlinkField(serializers.HyperlinkedIdentityField):
     # We define these as class attributes, so we don't need to pass them as arguments.
     view_name = 'comment-detail'
 
