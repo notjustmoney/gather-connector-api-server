@@ -10,6 +10,8 @@ django-phonenumber-field = "*"
 phonenumbers = "*"
 django-rest-auth = "*"
 requests = "*"
+selenium = "*"
+drf-nested-routers = "*"
 
 [dev-packages]
 
