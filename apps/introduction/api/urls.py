@@ -1,10 +1,13 @@
-from django.urls import path
-from .views import (QuestionListAPIView, QuestionDetailAPIView,
-                    AnswerListAPIView, AnswerDetailAPIView)
+from django.urls import path, include
+
+from rest_framework import routers
+
+from .views import QuestionViewSet, AnswerViewSet
+
+router = routers.DefaultRouter()
+router.register(r'questions', QuestionViewSet)
+router.register(r'answers', AnswerViewSet)
 
 urlpatterns = [
-    path(r'questions/', QuestionListAPIView.as_view()),
-    path(r'questions/<int:pk>', QuestionDetailAPIView.as_view(), name='question-detail'),
-    path(r'answers/', AnswerListAPIView.as_view(), name='answer-list'),
-    path(r'answers/<int:pk>', AnswerDetailAPIView.as_view(), name='answer-detail'),
+    path(r'', include(router.urls)),
 ]

@@ -1,32 +1,22 @@
-"""config URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/3.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls.py import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls.py'))
-"""
 from django.contrib import admin
+from django.conf.urls import url
 from django.urls import path, include
 
+from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
+
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 from apps.authentication.api.views import UserViewSet
 
 
 router = DefaultRouter()
-router.register(r'users', viewset=UserViewSet)
+router.register(r'', viewset=UserViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path(r'api/', include(router.urls)),
+    path(r'api/users/', include(router.urls)),
     path(r'api/auth/', include('apps.authentication.api.urls')),
     path(r'api/introduction/', include('apps.introduction.api.urls')),
     path(r'api/musics/', include('apps.song.api.urls')),
