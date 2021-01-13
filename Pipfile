@@ -12,6 +12,7 @@ django-rest-auth = "*"
 requests = "*"
 selenium = "*"
 drf-nested-routers = "*"
+drf-yasg = "*"
 
 [dev-packages]
 
