@@ -4,7 +4,7 @@ from .models import Song, Keyword, SongRequest, Comment, LikeSong, LikeComment
 
 @admin.register(Song)
 class SongAdmin(admin.ModelAdmin):
-    list_display = 'title', 'uri',
+    list_display = 'title', 'uri', 'like_cnt',
 
 
 @admin.register(Keyword)
@@ -14,8 +14,8 @@ class KeywordAdmin(admin.ModelAdmin):
 
 @admin.register(SongRequest)
 class SongRequestAdmin(admin.ModelAdmin):
-    list_display = 'song', 'user', 'requested_at', 'played_at',
-    list_filter = 'deleted_at',
+    list_display = 'song', 'user', 'requested_at', 'played_at', 'deleted_at',
+    list_filter = 'played_at', 'deleted_at',
 
 
 @admin.register(Comment)

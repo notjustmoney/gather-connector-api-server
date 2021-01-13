@@ -21,7 +21,7 @@ class SongRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SongRequest
-        fields = ['song', 'user', 'requested_at', 'updated_at', 'data_type', 'data', 'like_cnt', 'play_cnt', 'comments']
+        fields = ['url', 'song', 'user', 'requested_at', 'updated_at', 'played_at', 'data_type', 'data', 'like_cnt', 'play_cnt', 'comments']
 
     def create(self, validated_data):
         data_type = validated_data.pop('data_type', None)

@@ -1,6 +1,6 @@
 import datetime
 
-from django.db.models import Max, F
+from django.db.models import Max
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import utc
 
@@ -18,28 +18,8 @@ from ..serializers import SongRequestSerializer, SongCommentSerializer
 from .like import like_song, like_comment
 
 
-class SongRequestManager(viewsets.ModelViewSet):
-    queryset = SongRequest.objects.filter(deleted_at__isnull=True, played_at__isnull=True)
-    serializer_class = SongRequestSerializer
-    # permission_classes = admin only
-
-    @action(detail=False, methods=['post'], url_path='play')
-    def play(self, request):
-        print(Song.song_requests)
-        song_request = Song.song_requests.filter(deleted_at__isnull=True, played_at__isnull=True)
-        song_request.played_at = datetime.datetime.utcnow().replace(tzinfo=utc)
-        song_request.save()
-        return Response(song_request, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['post'], url_path='clear')
-    def clear(self, request):
-        now = datetime.datetime.utcnow().replace(tzinfo=utc)
-        self.get_queryset().update(deleted_at=now)
-        return Response(None, status=status.HTTP_204_NO_CONTENT)
-
-
 class SongRequestViewSet(viewsets.ModelViewSet):
-    queryset = SongRequest.objects.filter(deleted_at__isnull=True, played_at__isnull=True)
+    queryset = SongRequest.objects.filter(deleted_at__isnull=True, played_at__isnull=True).order_by('requested_at')
     serializer_class = SongRequestSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly,)
 
@@ -112,3 +92,46 @@ class SongRequestCommentViewSet(viewsets.ModelViewSet):
         comment_pk = pk
         comment = get_object_or_404(Comment, pk=comment_pk, song=song.id)
         return like_comment(request, user, comment)
+
+
+class SongRequestManager(viewsets.ReadOnlyModelViewSet):
+    queryset = SongRequest.objects.filter(deleted_at__isnull=True, played_at__isnull=True)
+    serializer_class = SongRequestSerializer
+    # permission_classes = admin only
+
+    def list(self, request, *args, **kwargs):
+        raise exceptions.MethodNotAllowed(request.method)
+
+    def retrieve(self, request, *args, **kwargs):
+        raise exceptions.MethodNotAllowed(request.method)
+
+    @action(detail=False, methods=['post'], url_path='play')
+    def play(self, request):
+        requests = self.get_queryset().order_by('requested_at')
+        songs = Song.objects.filter(id__in=requests.values('song_id')).annotate(max_like=Max('like_cnt')).order_by('-max_like')
+        if len(songs) == 0:
+            return Response({"message": "대기열이 비어있습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        song_id = songs[0].id
+        songs[0].play_cnt += 1
+        songs[0].save()
+
+        print('here!', song_id)
+        target = requests.filter(song_id=song_id)[0]
+        target.played_at = datetime.datetime.utcnow().replace(tzinfo=utc)
+        target.save()
+        serializer = self.get_serializer(target)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'], url_path='clear')
+    def clear(self, request):
+        if len(self.get_queryset()) == 0:
+            return Response({"message": "대기열이 비어있습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        now = datetime.datetime.utcnow().replace(tzinfo=utc)
+        self.get_queryset().update(deleted_at=now)
+        return Response(None, status=status.HTTP_204_NO_CONTENT)
+
+
+class HistoryViewSst(viewsets.ReadOnlyModelViewSet):
+    queryset = SongRequest.objects.filter(deleted_at__isnull=True, played_at__isnull=False)
+    serializer_class = SongRequestSerializer
+    permission_classes = (IsAuthenticated,)

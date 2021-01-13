@@ -2,4 +2,7 @@ from .song import (SongViewSet, SongCommentViewSet)
 
 from .playlist import (SongRequestManager,
                        SongRequestViewSet,
-                       SongRequestCommentViewSet)
+                       SongRequestCommentViewSet,
+                       HistoryViewSst)
+
+from .statistic import StatisticViewSet
