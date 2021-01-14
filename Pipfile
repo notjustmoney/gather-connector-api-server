@@ -13,8 +13,14 @@ requests = "*"
 selenium = "*"
 drf-nested-routers = "*"
 drf-yasg = "*"
+django-dotenv = "*"
+mysqlclient = "*"
 
 [dev-packages]
 
 [requires]
 python_version = "3.7"
+
+[scripts]
+start-dev = "./scripts/dev.sh"
+start-prod = "./scripts/prod.sh"

@@ -8,17 +8,9 @@ from pathlib import Path, PurePath
 
 def get_environ():
     server_env = os.environ['SERVER_ENV']
-
-    dotenv_name = '.env'
-    if server_env == 'dev':
-        dotenv_name = '.dev.env'
-    elif server_env == 'prod':
-        dotenv_name = '.prod.env'
-    elif server_env == 'test':
-        dotenv_name = 'test.env'
-
+    dotenv_name = f'.{server_env}.env'
     root_path = Path(__file__).parent.absolute()
-    dotenv_path = PurePath(root_path, f'../{dotenv_name}')
+    dotenv_path = PurePath(root_path, dotenv_name)
     dotenv.read_dotenv(dotenv_path)
 
 
