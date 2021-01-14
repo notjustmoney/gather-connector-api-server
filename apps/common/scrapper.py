@@ -3,7 +3,7 @@ from selenium import webdriver
 
 def get_video_title_and_uri(keyword):
     target_uri = f'https://youtube.com/results?search_query={keyword}'
-    driver_path = '/Users/jay/projects/gather-connector-api-server/chromedriver'
+    driver_path = '/Users/jay/projects/gather-connector-api-server/lib/chromedriver'
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     options.add_argument('disable-gpu')
