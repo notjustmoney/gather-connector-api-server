@@ -6,6 +6,7 @@ from .forms import UserChangeForm, UserCreationForm
 from .models import User
 
 
+@admin.register(User)
 class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
@@ -33,5 +34,4 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
 
-admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)

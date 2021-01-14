@@ -31,7 +31,7 @@ class LoginSerializer(serializers.Serializer):
     def authenticate(self, **kwargs):
         return authenticate(self.context['request'], **kwargs)
 
-    def _validate_email(self, email, password):
+    def validate_email(self, email, password):
         if email and password:
             user = self.authenticate(email=email, password=password)
         else:
@@ -43,25 +43,20 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
-        username = None
-
-        user = None
 
         try:
-            username = User.objects.get(email__iexact=email).get_username()
+            user = User.objects.get(email__iexact=email)
+            username = user.get_username()
         except User.DoesNotExist:
-            pass
+            msg = _('일치하는 회원정보를 조회할 수 없습니다.')
+            raise exceptions.APIException(detail=msg)
 
-        if username:
+        if username is not None:
             user = self.authenticate(username=username, password=password)
 
-        if user:
-            if not user.is_active:
-                msg = _('비활성화된 계정입니다.')
-                raise exceptions.ValidationError(msg)
-        else:
-            msg = _('제공된 인증자격으로 로그인 할 수 없습니다.')
-            raise exceptions.ValidationError(msg)
+        if user.is_active is False:
+            msg = _('비활성화된 계정입니다.')
+            raise exceptions.APIException(detail=msg)
 
         attrs['user'] = user
         return attrs

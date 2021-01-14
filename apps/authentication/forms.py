@@ -1,39 +1,39 @@
 from django import forms
-from django.contrib.auth.forms import ReadOnlyPasswordHashField, ReadOnlyPasswordHashWidget
+from django.contrib.auth.forms import ReadOnlyPasswordHashField, UserCreationForm, UserChangeForm
 
+from phonenumber_field.modelfields import PhoneNumberField
+
+from .constants.department import *
 from .models import User
 
 
-class UserCreationForm(forms.ModelForm):
-    password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
+class UserCreationForm(UserCreationForm):
+    name = forms.CharField(required=True)
+    phone_number = PhoneNumberField(null=False, blank=False, unique=True)
+    department = forms.ChoiceField(required=True, choices=DEPARTMENT_CHOICES)
+    task = forms.CharField()
 
     class Meta:
         model = User
         fields = 'name', 'phone_number', 'department', 'task',
-
-    def clean_password2(self):
-        password1 = self.cleaned_data.get('password1')
-        password2 = self.cleaned_data.get('password2')
-        if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("비밀번호가 일치하지 않습니다")
-        return password2
+        field_classes = {'username': forms.EmailField}
 
     def save(self, commit=True):
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data['password1'])
+        user = super(UserCreationForm, self).save()
+        user.name = self.cleaned_data['name']
+        user.phone_number = self.cleaned_data['phone_number']
+        user.department = self.cleaned_data['department']
+        user.task = self.cleaned_data['task']
+
         if commit:
             user.save()
         return user
 
 
-class UserChangeForm(forms.ModelForm):
-    password = ReadOnlyPasswordHashField()
+class UserChangeForm(UserChangeForm):
+    phone_number = PhoneNumberField(null=False, blank=False, unique=True)
+    department = forms.ChoiceField(required=True, choices=DEPARTMENT_CHOICES)
 
     class Meta:
         model = User
-        fields = 'email', 'password', 'name', 'display_name', 'phone_number',\
-                 'department', 'task', 'is_active', 'is_superuser', 'is_admin'
-
-    def clean_password(self):
-        return self.initial['password']
+        exclude = 'password',
